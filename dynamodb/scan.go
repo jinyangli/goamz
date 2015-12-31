@@ -53,7 +53,14 @@ func (t *Table) FetchResults(startKey *Key, query *Query) ([]map[string]*Attribu
 
 }
 
-func (t *Table) Scan(startKey *Key, attributeComparisons []AttributeComparison) ([]map[string]*Attribute, *Key, error) {
+func (t *Table) Scan(attributeComparisons []AttributeComparison) ([]map[string]*Attribute, error) {
+	q := NewQuery(t)
+	q.AddScanFilter(attributeComparisons)
+	attrs, _, err := t.FetchResults(nil, q)
+	return attrs, err
+}
+
+func (t *Table) ScanWithPagination(startKey *Key, attributeComparisons []AttributeComparison) ([]map[string]*Attribute, *Key, error) {
 	q := NewQuery(t)
 	q.AddScanFilter(attributeComparisons)
 	return t.FetchResults(startKey, q)
