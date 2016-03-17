@@ -1,7 +1,7 @@
 package dynamodb_test
 
 import (
-	"github.com/goamz/goamz/dynamodb"
+	"github.com/jinyangli/goamz/dynamodb"
 	. "gopkg.in/check.v1"
 )
 
@@ -14,7 +14,7 @@ type ItemSuite struct {
 func (s *ItemSuite) SetUpSuite(c *C) {
 	setUpAuth(c)
 	s.DynamoDBTest.TableDescriptionT = s.TableDescriptionT
-	s.server = &dynamodb.Server{dynamodb_auth, dynamodb_region}
+	s.server = &dynamodb.Server{dynamodb_auth, dynamodb_region, nil}
 	pk, err := s.TableDescriptionT.BuildPrimaryKey()
 	if err != nil {
 		c.Skip(err.Error())
@@ -391,7 +391,7 @@ func (s *ItemSuite) TestUpdateItemWithSet(c *C) {
 
 func (s *ItemSuite) TestUpdateItem_new(c *C) {
 	attrs := []dynamodb.Attribute{
-		*dynamodb.NewStringAttribute("intval", "1"),
+		*dynamodb.NewNumericAttribute("intval", "1"),
 	}
 	var rk string
 	if s.WithRange {
@@ -417,22 +417,34 @@ func (s *ItemSuite) TestUpdateItem_new(c *C) {
 	checkVal("1")
 
 	// Simple Increment
-	s.table.UpdateItem(pk).UpdateExpression("SET intval = intval + :incr", num(":incr", "5")).Execute()
+	up := s.table.UpdateItem(pk).UpdateExpression("SET intval = intval + :incr", num(":incr", "5"))
+	c.Log(up.String())
+	_, err := up.Execute()
+	if err != nil {
+		c.Error(err)
+	}
 	checkVal("6")
 
-	conditionalUpdate := func(check string) {
-		s.table.UpdateItem(pk).
+	conditionalUpdate := func(check string) error {
+		_, err := s.table.UpdateItem(pk).
 			ConditionExpression("intval = :check").
 			UpdateExpression("SET intval = intval + :incr").
 			ExpressionAttributes(num(":check", check), num(":incr", "4")).
 			Execute()
+		return err
 	}
 	// Conditional increment should be a no-op.
-	conditionalUpdate("42")
+	err = conditionalUpdate("42")
+	if err != nil {
+		c.Error(err)
+	}
 	checkVal("6")
 
 	// conditional increment should succeed this time
-	conditionalUpdate("6")
+	err = conditionalUpdate("6")
+	if err != nil {
+		c.Error(err)
+	}
 	checkVal("10")
 
 	// Update with new values getting values

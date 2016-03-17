@@ -31,6 +31,10 @@ type UpdateItem struct {
 	hasReturnValues bool
 }
 
+func (u *UpdateItem) String() string {
+	return u.query.String()
+}
+
 // Specify how return values are to be provided.
 func (u *UpdateItem) ReturnValues(returnValues ReturnValues) *UpdateItem {
 	u.hasReturnValues = (returnValues != NONE)
@@ -55,9 +59,15 @@ func (u *UpdateItem) UpdateExpression(expression string, attributes ...Attribute
 	return u
 }
 
-// Specify attribute substitutions to be used in expressions.
+// Specify attribute value substitutions to be used in expressions.
 func (u *UpdateItem) ExpressionAttributes(attributes ...Attribute) *UpdateItem {
-	u.query.AddExpressionAttributes(attributes)
+	u.query.AddExpressionAttributes(true, attributes)
+	return u
+}
+
+// Specify attribute name substitutions to be used in expressions.
+func (u *UpdateItem) ExpressionAttributeNames(attributes ...Attribute) *UpdateItem {
+	u.query.AddExpressionAttributes(false, attributes)
 	return u
 }
 

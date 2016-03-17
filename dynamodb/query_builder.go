@@ -300,11 +300,15 @@ func (q *Query) AddConditionExpression(expression string) {
 	q.buffer["ConditionExpression"] = expression
 }
 
-func (q *Query) AddExpressionAttributes(attributes []Attribute) {
-	existing, ok := q.buffer["ExpressionAttributes"].(msi)
+func (q *Query) AddExpressionAttributes(isValue bool, attributes []Attribute) {
+	name := "ExpressionAttributeValues"
+	if !isValue {
+		name = "ExpressionAttributeNames"
+	}
+	existing, ok := q.buffer[name].(msi)
 	if !ok {
 		existing = msi{}
-		q.buffer["ExpressionAttributes"] = existing
+		q.buffer[name] = existing
 	}
 	for key, val := range attributeList(attributes) {
 		existing[key] = val
