@@ -300,17 +300,26 @@ func (q *Query) AddConditionExpression(expression string) {
 	q.buffer["ConditionExpression"] = expression
 }
 
-func (q *Query) AddExpressionAttributes(isValue bool, attributes []Attribute) {
-	name := "ExpressionAttributeValues"
-	if !isValue {
-		name = "ExpressionAttributeNames"
-	}
-	existing, ok := q.buffer[name].(msi)
+func (q *Query) AddExpressionAttributes(attributes []Attribute) {
+	fName := "ExpressionAttributeValues"
+	existing, ok := q.buffer[fName].(msi)
 	if !ok {
 		existing = msi{}
-		q.buffer[name] = existing
+		q.buffer[fName] = existing
 	}
 	for key, val := range attributeList(attributes) {
+		existing[key] = val
+	}
+}
+
+func (q *Query) AddExpressionAttributeNames(names map[string]string) {
+	fName := "ExpressionAttributeNames"
+	existing, ok := q.buffer[fName].(msi)
+	if !ok {
+		existing = msi{}
+		q.buffer[fName] = existing
+	}
+	for key, val := range names {
 		existing[key] = val
 	}
 }

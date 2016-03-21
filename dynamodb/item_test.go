@@ -418,7 +418,7 @@ func (s *ItemSuite) TestUpdateItem_new(c *C) {
 	checkVal("1")
 
 	// Simple Increment
-	up := s.table.UpdateItem(pk).UpdateExpression("SET intval = intval + :incr", num(":incr", "5"))
+	up := s.table.UpdateItem(pk).UpdateExpression("SET #a = #a + :incr", num(":incr", "5")).ExpressionAttributeNames(map[string]string{"#a": "intval"})
 	c.Log(up.String())
 	_, err := up.Execute()
 	if err != nil {

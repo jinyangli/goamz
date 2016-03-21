@@ -61,13 +61,13 @@ func (u *UpdateItem) UpdateExpression(expression string, attributes ...Attribute
 
 // Specify attribute value substitutions to be used in expressions.
 func (u *UpdateItem) ExpressionAttributes(attributes ...Attribute) *UpdateItem {
-	u.query.AddExpressionAttributes(true, attributes)
+	u.query.AddExpressionAttributes(attributes)
 	return u
 }
 
 // Specify attribute name substitutions to be used in expressions.
-func (u *UpdateItem) ExpressionAttributeNames(attributes ...Attribute) *UpdateItem {
-	u.query.AddExpressionAttributes(false, attributes)
+func (u *UpdateItem) ExpressionAttributeNames(names map[string]string) *UpdateItem {
+	u.query.AddExpressionAttributeNames(names)
 	return u
 }
 
