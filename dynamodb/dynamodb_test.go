@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"../dynamodb"
 	"github.com/goamz/goamz/aws"
-	"github.com/goamz/goamz/dynamodb"
 	. "gopkg.in/check.v1"
 )
 
@@ -131,8 +131,8 @@ func (s *DynamoDBTest) WaitUntilStatus(c *C, status string) {
 }
 
 func setUpAuth(c *C) {
-	if !*amazon {
-		c.Skip("Test against amazon not enabled.")
+	if !*amazon && !*local {
+		c.Skip("Neither test against local nor amazon is enabled.")
 	}
 	if *local {
 		c.Log("Using local server")

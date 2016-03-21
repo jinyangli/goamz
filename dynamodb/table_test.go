@@ -1,7 +1,7 @@
 package dynamodb_test
 
 import (
-	"github.com/goamz/goamz/dynamodb"
+	"../dynamodb"
 	. "gopkg.in/check.v1"
 )
 
@@ -13,7 +13,7 @@ type TableSuite struct {
 func (s *TableSuite) SetUpSuite(c *C) {
 	setUpAuth(c)
 	s.DynamoDBTest.TableDescriptionT = s.TableDescriptionT
-	s.server = &dynamodb.Server{dynamodb_auth, dynamodb_region}
+	s.server = &dynamodb.Server{dynamodb_auth, dynamodb_region, nil}
 	pk, err := s.TableDescriptionT.BuildPrimaryKey()
 	if err != nil {
 		c.Skip(err.Error())
