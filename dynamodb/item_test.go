@@ -3,6 +3,7 @@ package dynamodb_test
 import (
 	"github.com/jinyangli/goamz/dynamodb"
 	. "gopkg.in/check.v1"
+	"strings"
 )
 
 type ItemSuite struct {
@@ -435,7 +436,7 @@ func (s *ItemSuite) TestUpdateItem_new(c *C) {
 	}
 	// Conditional increment should be a no-op.
 	err = conditionalUpdate("42")
-	if err != nil {
+	if err == nil || !strings.HasPrefix(err.Error(), "ConditionalCheckFailedException") {
 		c.Error(err)
 	}
 	checkVal("6")
@@ -453,6 +454,6 @@ func (s *ItemSuite) TestUpdateItem_new(c *C) {
 		UpdateExpression("SET intval = intval + :incr", num(":incr", "2")).
 		Execute()
 	c.Check(err, IsNil)
-	c.Check(result.Attributes["intval"], DeepEquals, num("intval", "12"))
+	c.Check(*(result.Attributes["intval"]), DeepEquals, num("intval", "12"))
 	checkVal("12")
 }
