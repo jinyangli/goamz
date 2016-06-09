@@ -12,14 +12,14 @@ import (
 )
 
 type SES struct {
-	auth   aws.Auth
+	auth   *aws.Auth
 	region aws.Region
 	client *http.Client
 }
 
 // Initializes a pointer to an SES struct which can be used
 // to perform SES API calls.
-func NewSES(auth aws.Auth, region aws.Region) *SES {
+func NewSES(auth *aws.Auth, region aws.Region) *SES {
 	ses := SES{auth, region, nil}
 	return &ses
 }
@@ -113,9 +113,9 @@ func (ses *SES) doPost(action string, data url.Values) error {
 
 	req.URL = URL
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	sign(ses.auth, "POST", req.Header)
+	accessKey := sign(ses.auth, "POST", req.Header)
 
-	data.Add("AWSAccessKeyId", ses.auth.AccessKey)
+	data.Add("AWSAccessKeyId", accessKey)
 	data.Add("Action", action)
 
 	body := data.Encode()

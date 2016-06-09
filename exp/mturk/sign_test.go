@@ -1,6 +1,8 @@
 package mturk_test
 
 import (
+	"time"
+
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/exp/mturk"
 	. "gopkg.in/check.v1"
@@ -8,7 +10,7 @@ import (
 
 // Mechanical Turk REST authentication docs: http://goo.gl/wrzfn
 
-var testAuth = aws.Auth{AccessKey: "user", SecretKey: "secret"}
+var testAuth = aws.NewAuth("user", "secret", "", time.Time{})
 
 // == fIJy9wCApBNL2R4J2WjJGtIBFX4=
 func (s *S) TestBasicSignature(c *C) {

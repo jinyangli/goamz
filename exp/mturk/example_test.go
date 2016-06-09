@@ -2,6 +2,8 @@ package mturk_test
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/exp/mturk"
 )
@@ -11,7 +13,7 @@ var turk *mturk.MTurk
 func ExampleNew() {
 	// These are your AWS tokens. Note that Turk do not support IAM.
 	// So you'll have to use your main profile's tokens.
-	var auth = aws.Auth{AccessKey: "<ACCESS_KEY>", SecretKey: "<SECRET_KEY>"}
+	auth := aws.NewAuth("<ACCESS_KEY>", "<SECRET_KEY>", "", time.Time{})
 	turk = mturk.New(auth, true) // true to use sandbox mode
 }
 

@@ -12,7 +12,7 @@ import (
 )
 
 type Server struct {
-	Auth   aws.Auth
+	Auth   *aws.Auth
 	Region aws.Region
 	Client *http.Client // if set, it overrides http.DefaultClient
 }
@@ -97,13 +97,7 @@ func (s *Server) queryServer(target string, query *Query) ([]byte, error) {
 	hreq.Header.Set("X-Amz-Date", time.Now().UTC().Format(aws.ISO8601BasicFormat))
 	hreq.Header.Set("X-Amz-Target", target)
 
-	token := s.Auth.Token()
-	if token != "" {
-		hreq.Header.Set("X-Amz-Security-Token", token)
-	}
-
-	signer := aws.NewV4Signer(s.Auth, "dynamodb", s.Region)
-	signer.Sign(hreq)
+	aws.NewV4Signer(s.Auth, "dynamodb", s.Region).Sign(hreq)
 
 	if s.Client == nil {
 		s.Client = http.DefaultClient

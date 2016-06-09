@@ -22,12 +22,12 @@ import (
 
 // The CloudFormation type encapsulates operations within a specific EC2 region.
 type CloudFormation struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 }
 
 // New creates a new CloudFormation Client.
-func New(auth aws.Auth, region aws.Region) *CloudFormation {
+func New(auth *aws.Auth, region aws.Region) *CloudFormation {
 
 	return &CloudFormation{auth, region}
 
@@ -78,13 +78,7 @@ func (c *CloudFormation) query(params map[string]string, resp interface{}) error
 
 	hreq.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
-	token := c.Auth.Token()
-	if token != "" {
-		hreq.Header.Set("X-Amz-Security-Token", token)
-	}
-
-	signer := aws.NewV4Signer(c.Auth, "cloudformation", c.Region)
-	signer.Sign(hreq)
+	aws.NewV4Signer(c.Auth, "cloudformation", c.Region).Sign(hreq)
 
 	if debug {
 		log.Printf("%v -> {\n", hreq)

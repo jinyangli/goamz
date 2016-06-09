@@ -1,12 +1,14 @@
 package elb_test
 
 import (
+	"time"
+
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/elb"
 	. "gopkg.in/check.v1"
 )
 
-var testAuth = aws.Auth{AccessKey: "user", SecretKey: "secret"}
+var testAuth = aws.NewAuth("user", "secret", "", time.Time{})
 
 func (s *S) TestBasicSignature(c *C) {
 	params := map[string]string{}
@@ -60,7 +62,7 @@ func (s *S) TestSignatureExample1(c *C) {
 		"Version":   "2007-11-07",
 		"Action":    "ListDomains",
 	}
-	elb.Sign(aws.Auth{AccessKey: "access", SecretKey: "secret"}, "GET", "/", params, "sdb.amazonaws.com")
+	elb.Sign(aws.NewAuth("access", "secret", "", time.Time{}), "GET", "/", params, "sdb.amazonaws.com")
 	expected := "okj96/5ucWBSc1uR2zXVfm6mDHtgfNv657rRtt/aunQ="
 	c.Assert(params["Signature"], Equals, expected)
 }

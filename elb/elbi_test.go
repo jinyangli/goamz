@@ -13,7 +13,7 @@ var amazon = flag.Bool("amazon", false, "Enable tests against amazon server")
 
 // AmazonServer represents an Amazon AWS server.
 type AmazonServer struct {
-	auth aws.Auth
+	auth *aws.Auth
 }
 
 func (s *AmazonServer) SetUp(c *C) {

@@ -13,7 +13,7 @@ import (
 var _ = Suite(&V4SignerSuite{})
 
 type V4SignerSuite struct {
-	auth   aws.Auth
+	auth   *aws.Auth
 	region aws.Region
 	cases  []V4SignerSuiteCase
 }
@@ -36,7 +36,7 @@ type V4SignerSuiteCaseRequest struct {
 }
 
 func (s *V4SignerSuite) SetUpSuite(c *C) {
-	s.auth = aws.Auth{AccessKey: "AKIDEXAMPLE", SecretKey: "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"}
+	s.auth = aws.NewAuth("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY", "", time.Time{})
 	s.region = aws.USEast
 
 	// Test cases from the Signature Version 4 Test Suite (http://goo.gl/nguvs0)
@@ -487,10 +487,12 @@ func (s *V4SignerSuite) TestCases(c *C) {
 		stringToSign := signer.StringToSign(t, canonicalRequest)
 		c.Check(stringToSign, Equals, testCase.stringToSign, Commentf("Testcase: %s", testCase.label))
 
-		signature := signer.Signature(t, stringToSign)
+		accessKey, secretKey, _ := s.auth.Credentials()
+
+		signature := signer.Signature(t, stringToSign, secretKey)
 		c.Check(signature, Equals, testCase.signature, Commentf("Testcase: %s", testCase.label))
 
-		authorization := signer.Authorization(req.Header, t, signature)
+		authorization := signer.Authorization(req.Header, t, signature, accessKey)
 		c.Check(authorization, Equals, testCase.authorization, Commentf("Testcase: %s", testCase.label))
 
 		signer.Sign(req)

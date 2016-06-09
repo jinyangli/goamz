@@ -1,6 +1,7 @@
 package cloudwatch_test
 
 import (
+	"time"
 	"testing"
 
 	"github.com/goamz/goamz/aws"
@@ -23,7 +24,7 @@ var testServer = testutil.NewHTTPServer()
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.cw, _ = cloudwatch.NewCloudWatch(auth, aws.ServiceInfo{testServer.URL, aws.V2Signature})
 }
 

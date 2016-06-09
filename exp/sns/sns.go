@@ -26,7 +26,7 @@ import (
 
 // The SNS type encapsulates operation with an SNS region.
 type SNS struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 	private byte // Reserve the right of using private data.
 }
@@ -41,7 +41,7 @@ type ResponseMetadata struct {
 	BoxUsage  float64 `xml:"ResponseMetadata>BoxUsage"`
 }
 
-func New(auth aws.Auth, region aws.Region) *SNS {
+func New(auth *aws.Auth, region aws.Region) *SNS {
 	return &SNS{auth, region, 0}
 }
 

@@ -11,7 +11,7 @@ import (
 
 // AmazonServer represents an Amazon AWS server.
 type AmazonServer struct {
-	auth aws.Auth
+	auth *aws.Auth
 }
 
 func (s *AmazonServer) SetUp(c *C) {

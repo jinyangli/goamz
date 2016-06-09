@@ -28,12 +28,12 @@ var timeNow = time.Now
 
 // AutoScaling contains the details of the AWS region to perform operations against.
 type AutoScaling struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 }
 
 // New creates a new AutoScaling Client.
-func New(auth aws.Auth, region aws.Region) *AutoScaling {
+func New(auth *aws.Auth, region aws.Region) *AutoScaling {
 	return &AutoScaling{auth, region}
 }
 
@@ -79,13 +79,7 @@ func (as *AutoScaling) query(params map[string]string, resp interface{}) error {
 
 	hreq.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
-	token := as.Auth.Token()
-	if token != "" {
-		hreq.Header.Set("X-Amz-Security-Token", token)
-	}
-
-	signer := aws.NewV4Signer(as.Auth, "autoscaling", as.Region)
-	signer.Sign(hreq)
+	aws.NewV4Signer(as.Auth, "autoscaling", as.Region).Sign(hreq)
 
 	if debug {
 		log.Printf("%v -> {\n", hreq)

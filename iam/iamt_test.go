@@ -1,6 +1,8 @@
 package iam_test
 
 import (
+	"time"
+
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/iam"
 	"github.com/goamz/goamz/iam/iamtest"
@@ -9,7 +11,7 @@ import (
 
 // LocalServer represents a local ec2test fake server.
 type LocalServer struct {
-	auth   aws.Auth
+	auth   *aws.Auth
 	region aws.Region
 	srv    *iamtest.Server
 }
@@ -21,6 +23,7 @@ func (s *LocalServer) SetUp(c *C) {
 
 	s.srv = srv
 	s.region = aws.Region{IAMEndpoint: srv.URL()}
+	s.auth = aws.NewAuth("", "", "", time.Time{})
 }
 
 // LocalServerSuite defines tests that will run

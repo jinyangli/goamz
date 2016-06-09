@@ -15,11 +15,11 @@ import (
 )
 
 type ELB struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 }
 
-func New(auth aws.Auth, region aws.Region) *ELB {
+func New(auth *aws.Auth, region aws.Region) *ELB {
 	return &ELB{auth, region}
 }
 
@@ -338,13 +338,8 @@ func (elb *ELB) query(params map[string]string, resp interface{}) error {
 	}
 
 	hreq.URL.RawQuery = multimap(params).Encode()
-	token := elb.Auth.Token()
-	if token != "" {
-		hreq.Header.Set("X-Amz-Security-Token", token)
-	}
 
-	signer := aws.NewV4Signer(elb.Auth, "elasticloadbalancing", elb.Region)
-	signer.Sign(hreq)
+	aws.NewV4Signer(elb.Auth, "elasticloadbalancing", elb.Region).Sign(hreq)
 
 	r, err := http.DefaultClient.Do(hreq)
 

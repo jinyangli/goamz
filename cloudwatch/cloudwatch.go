@@ -177,7 +177,7 @@ var validComparisonOperators = sets.SSet(
 )
 
 // Create a new CloudWatch object for a given namespace
-func NewCloudWatch(auth aws.Auth, region aws.ServiceInfo) (*CloudWatch, error) {
+func NewCloudWatch(auth *aws.Auth, region aws.ServiceInfo) (*CloudWatch, error) {
 	service, err := aws.NewService(auth, region)
 	if err != nil {
 		return nil, err

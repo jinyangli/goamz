@@ -2,6 +2,7 @@ package ec2_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/ec2"
@@ -23,7 +24,7 @@ var testServer = testutil.NewHTTPServer()
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.ec2 = ec2.NewWithClient(
 		auth,
 		aws.Region{EC2Endpoint: testServer.URL},

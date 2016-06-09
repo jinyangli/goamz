@@ -1,6 +1,8 @@
 package elb_test
 
 import (
+	"time"
+
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/elb"
 	"github.com/goamz/goamz/elb/elbtest"
@@ -9,7 +11,7 @@ import (
 
 // LocalServer represents a local elbtest fake server.
 type LocalServer struct {
-	auth   aws.Auth
+	auth   *aws.Auth
 	region aws.Region
 	srv    *elbtest.Server
 }
@@ -20,6 +22,7 @@ func (s *LocalServer) SetUp(c *C) {
 	c.Assert(srv, NotNil)
 	s.srv = srv
 	s.region = aws.Region{ELBEndpoint: srv.URL()}
+	s.auth = aws.NewAuth("", "", "", time.Time{})
 }
 
 // LocalServerSuite defines tests that will run

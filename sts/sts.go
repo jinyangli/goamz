@@ -22,14 +22,14 @@ import (
 
 // The STS type encapsulates operations within a specific EC2 region.
 type STS struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 	private byte // Reserve the right of using private data.
 }
 
 // New creates a new STS Client.
 // We can only use us-east for region because AWS..
-func New(auth aws.Auth, region aws.Region) *STS {
+func New(auth *aws.Auth, region aws.Region) *STS {
 	// Make sure we can run the package tests
 	if region.Name == "" {
 		return &STS{auth, region, 0}
@@ -80,13 +80,7 @@ func (sts *STS) query(params map[string]string, resp interface{}) error {
 
 	hreq.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
-	token := sts.Auth.Token()
-	if token != "" {
-		hreq.Header.Set("X-Amz-Security-Token", token)
-	}
-
-	signer := aws.NewV4Signer(sts.Auth, "sts", sts.Region)
-	signer.Sign(hreq)
+	aws.NewV4Signer(sts.Auth, "sts", sts.Region).Sign(hreq)
 
 	if debug {
 		log.Printf("%v -> {\n", hreq)

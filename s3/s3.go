@@ -35,7 +35,7 @@ const debug = false
 
 // The S3 type encapsulates operations with an S3 region.
 type S3 struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 
 	// ConnectTimeout is the maximum time a request attempt will
@@ -123,7 +123,7 @@ var DefaultAttemptStrategy = aws.AttemptStrategy{
 }
 
 // New creates a new S3.  Optional client argument allows for custom http.clients to be used.
-func New(auth aws.Auth, region aws.Region, client ...*http.Client) *S3 {
+func New(auth *aws.Auth, region aws.Region, client ...*http.Client) *S3 {
 
 	var httpclient *http.Client
 
@@ -784,7 +784,8 @@ func (b *Bucket) SignedURL(path string, expires time.Time) string {
 	if err != nil {
 		panic(err)
 	}
-	if b.S3.Auth.Token() != "" {
+	_, _, token := b.S3.Auth.Credentials()
+	if token != "" {
 		return u.String() + "&x-amz-security-token=" + url.QueryEscape(req.headers["X-Amz-Security-Token"][0])
 	} else {
 		return u.String()
@@ -803,8 +804,7 @@ func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time
 	stringToSign := method + "\n\n" + content_type + "\n" + strconv.FormatInt(expire_date, 10) + "\n/" + b.Name + "/" + path
 	fmt.Println("String to sign:\n", stringToSign)
 	a := b.S3.Auth
-	secretKey := a.SecretKey
-	accessId := a.AccessKey
+	accessId, secretKey, token := a.Credentials()
 	mac := hmac.New(sha1.New, []byte(secretKey))
 	mac.Write([]byte(stringToSign))
 	macsum := mac.Sum(nil)
@@ -821,8 +821,8 @@ func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time
 	params.Add("AWSAccessKeyId", accessId)
 	params.Add("Expires", strconv.FormatInt(expire_date, 10))
 	params.Add("Signature", signature)
-	if a.Token() != "" {
-		params.Add("token", a.Token())
+	if token != "" {
+		params.Add("token", token)
 	}
 
 	signedurl.RawQuery = params.Encode()
@@ -832,9 +832,11 @@ func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time
 // PostFormArgs returns the action and input fields needed to allow anonymous
 // uploads to a bucket within the expiration limit
 func (b *Bucket) PostFormArgs(path string, expires time.Time, redirect string) (action string, fields map[string]string) {
+	accessKey, secretKey, _ := b.Auth.Credentials()
+
 	conditions := make([]string, 0)
 	fields = map[string]string{
-		"AWSAccessKeyId": b.Auth.AccessKey,
+		"AWSAccessKeyId": accessKey,
 		"key":            path,
 	}
 
@@ -851,7 +853,7 @@ func (b *Bucket) PostFormArgs(path string, expires time.Time, redirect string) (
 	policy64 := base64.StdEncoding.EncodeToString([]byte(policy))
 	fields["policy"] = policy64
 
-	signer := hmac.New(sha1.New, []byte(b.Auth.SecretKey))
+	signer := hmac.New(sha1.New, []byte(secretKey))
 	signer.Write([]byte(policy64))
 	fields["signature"] = base64.StdEncoding.EncodeToString(signer.Sum(nil))
 
@@ -946,9 +948,6 @@ func (s3 *S3) prepare(req *request) error {
 	reqSignpathSpaceFix := (&url.URL{Path: signpath}).String()
 	req.headers["Host"] = []string{u.Host}
 	req.headers["Date"] = []string{time.Now().In(time.UTC).Format(time.RFC1123)}
-	if s3.Auth.Token() != "" {
-		req.headers["X-Amz-Security-Token"] = []string{s3.Auth.Token()}
-	}
 	sign(s3.Auth, req.method, reqSignpathSpaceFix, req.params, req.headers)
 	return nil
 }

@@ -2,6 +2,7 @@ package sns_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/exp/sns"
@@ -23,7 +24,7 @@ var testServer = testutil.NewHTTPServer()
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.sns = sns.New(auth, aws.Region{SNSEndpoint: testServer.URL})
 }
 
@@ -118,7 +119,7 @@ func (s *S) TestGetTopicAttributes(c *C) {
 func (s *S) TestPublish(c *C) {
 	testServer.Response(200, nil, TestPublishXmlOK)
 
-	pubOpt := &sns.PublishOpt{"foobar", "", "subject", "arn:aws:sns:us-east-1:123456789012:My-Topic"}
+	pubOpt := &sns.PublishOpt{"foobar", "", "subject", "arn:aws:sns:us-east-1:123456789012:My-Topic", ""}
 	resp, err := s.sns.Publish(pubOpt)
 	req := testServer.WaitRequest()
 

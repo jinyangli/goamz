@@ -32,7 +32,7 @@ const debug = false
 
 // The SQS type encapsulates operation with an SQS region.
 type SQS struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 	private byte // Reserve the right of using private data.
 }
@@ -41,7 +41,7 @@ type SQS struct {
 // region must be one of "us.east, us.west, eu.west"
 func NewFrom(accessKey, secretKey, region string) (*SQS, error) {
 
-	auth := aws.Auth{AccessKey: accessKey, SecretKey: secretKey}
+	auth := aws.NewAuth(accessKey, secretKey, "", time.Time{})
 	aws_region := aws.USEast
 
 	switch region {
@@ -72,7 +72,7 @@ func NewFrom(accessKey, secretKey, region string) (*SQS, error) {
 }
 
 // NewFrom Create A new SQS Client from an exisisting aws.Auth
-func New(auth aws.Auth, region aws.Region) *SQS {
+func New(auth *aws.Auth, region aws.Region) *SQS {
 	return &SQS{auth, region, 0}
 }
 
@@ -498,10 +498,6 @@ func (s *SQS) query(queueUrl string, params map[string]string, resp interface{})
 		return err
 	}
 
-	if s.Auth.Token() != "" {
-		params["SecurityToken"] = s.Auth.Token()
-	}
-
 	var r *http.Response
 	if s.Region.Name == "cn-north-1" {
 		var sarray []string
@@ -513,8 +509,7 @@ func (s *SQS) query(queueUrl string, params map[string]string, resp interface{})
 		if err != nil {
 			return err
 		}
-		signer := aws.NewV4Signer(s.Auth, "sqs", s.Region)
-		signer.Sign(req)
+		aws.NewV4Signer(s.Auth, "sqs", s.Region).Sign(req)
 		client := http.Client{}
 		r, err = client.Do(req)
 	} else {

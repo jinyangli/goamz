@@ -20,7 +20,7 @@ func Test(t *testing.T) {
 var integration = flag.Bool("i", false, "Enable integration tests")
 
 type SuiteI struct {
-	auth aws.Auth
+	auth *aws.Auth
 }
 
 func (s *SuiteI) SetUpSuite(c *C) {

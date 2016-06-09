@@ -27,7 +27,7 @@ var mockTest bool
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.cf = cf.New(auth, aws.Region{CloudFormationEndpoint: testServer.URL})
 }
 

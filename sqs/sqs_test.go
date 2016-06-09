@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"hash"
+	"time"
 
 	"github.com/goamz/goamz/aws"
 	. "gopkg.in/check.v1"
@@ -19,7 +20,7 @@ type S struct {
 
 func (s *S) SetUpSuite(c *C) {
 	s.HTTPSuite.SetUpSuite(c)
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.sqs = New(auth, aws.Region{SQSEndpoint: testServer.URL})
 }
 

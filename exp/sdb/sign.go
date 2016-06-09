@@ -16,7 +16,7 @@ var b64 = base64.StdEncoding
 // ----------------------------------------------------------------------------
 // SimpleDB signing (http://goo.gl/CaY81)
 
-func sign(auth aws.Auth, method, path string, params url.Values, headers http.Header) {
+func sign(auth *aws.Auth, method, path string, params url.Values, headers http.Header) {
 	var host string
 	for k, v := range headers {
 		k = strings.ToLower(k)
@@ -26,12 +26,14 @@ func sign(auth aws.Auth, method, path string, params url.Values, headers http.He
 		}
 	}
 
+	accessKey, secretKey, token := auth.Credentials()
+
 	// set up some defaults used for signing the request
-	params["AWSAccessKeyId"] = []string{auth.AccessKey}
+	params["AWSAccessKeyId"] = []string{accessKey}
 	params["SignatureVersion"] = []string{"2"}
 	params["SignatureMethod"] = []string{"HmacSHA256"}
-	if auth.Token() != "" {
-		params["SecurityToken"] = []string{auth.Token()}
+	if token != "" {
+		params["SecurityToken"] = []string{token}
 	}
 
 	// join up all the incoming params
@@ -44,7 +46,7 @@ func sign(auth aws.Auth, method, path string, params url.Values, headers http.He
 
 	// create the payload, sign it and create the signature
 	payload := strings.Join([]string{method, host, "/", joined}, "\n")
-	hash := hmac.New(sha256.New, []byte(auth.SecretKey))
+	hash := hmac.New(sha256.New, []byte(secretKey))
 	hash.Write([]byte(payload))
 	signature := make([]byte, b64.EncodedLen(hash.Size()))
 	b64.Encode(signature, hash.Sum(nil))

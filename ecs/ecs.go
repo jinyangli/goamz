@@ -28,12 +28,12 @@ var timeNow = time.Now
 
 // ECS contains the details of the AWS region to perform operations against.
 type ECS struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 }
 
 // New creates a new ECS Client.
-func New(auth aws.Auth, region aws.Region) *ECS {
+func New(auth *aws.Auth, region aws.Region) *ECS {
 	return &ECS{auth, region}
 }
 
@@ -79,13 +79,7 @@ func (e *ECS) query(params map[string]string, resp interface{}) error {
 
 	hreq.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
-	token := e.Auth.Token()
-	if token != "" {
-		hreq.Header.Set("X-Amz-Security-Token", token)
-	}
-
-	signer := aws.NewV4Signer(e.Auth, "ecs", e.Region)
-	signer.Sign(hreq)
+	aws.NewV4Signer(e.Auth, "ecs", e.Region).Sign(hreq)
 
 	if debug {
 		log.Printf("%v -> {\n", hreq)
