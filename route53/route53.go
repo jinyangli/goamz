@@ -10,7 +10,7 @@ import (
 )
 
 type Route53 struct {
-	Auth     aws.Auth
+	Auth     *aws.Auth
 	Endpoint string
 	Signer   *aws.Route53Signer
 	Service  *aws.Service
@@ -19,7 +19,7 @@ type Route53 struct {
 const route53_host = "https://route53.amazonaws.com"
 
 // Factory for the route53 type
-func NewRoute53(auth aws.Auth) (*Route53, error) {
+func NewRoute53(auth *aws.Auth) (*Route53, error) {
 	signer := aws.NewRoute53Signer(auth)
 
 	return &Route53{

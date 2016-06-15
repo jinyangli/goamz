@@ -48,10 +48,11 @@ func sign(auth aws.Auth, method, path string, params url.Values, headers http.He
     println("Signature:", strings.Join(params["Signature"], "|"))
 }*/
 
-func sign(auth aws.Auth, method, path string, params map[string]string, host string) {
-	params["AWSAccessKeyId"] = auth.AccessKey
-	if auth.Token() != "" {
-		params["SecurityToken"] = auth.Token()
+func sign(auth *aws.Auth, method, path string, params map[string]string, host string) {
+	accessKey, secretKey, token := auth.Credentials()
+	params["AWSAccessKeyId"] = accessKey
+	if token != "" {
+		params["SecurityToken"] = token
 	}
 	params["SignatureVersion"] = "2"
 	params["SignatureMethod"] = "HmacSHA256"
@@ -63,7 +64,7 @@ func sign(auth aws.Auth, method, path string, params map[string]string, host str
 	sort.StringSlice(sarray).Sort()
 	joined := strings.Join(sarray, "&")
 	payload := method + "\n" + host + "\n" + path + "\n" + joined
-	hash := hmac.New(sha256.New, []byte(auth.SecretKey))
+	hash := hmac.New(sha256.New, []byte(secretKey))
 	hash.Write([]byte(payload))
 	signature := make([]byte, b64.EncodedLen(hash.Size()))
 	b64.Encode(signature, hash.Sum(nil))

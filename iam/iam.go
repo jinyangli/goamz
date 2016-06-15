@@ -15,17 +15,17 @@ import (
 
 // The IAM type encapsulates operations operations with the IAM endpoint.
 type IAM struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 	httpClient *http.Client
 }
 
 // New creates a new IAM instance.
-func New(auth aws.Auth, region aws.Region) *IAM {
+func New(auth *aws.Auth, region aws.Region) *IAM {
 	return NewWithClient(auth, region, aws.RetryingClient)
 }
 
-func NewWithClient(auth aws.Auth, region aws.Region, httpClient *http.Client) *IAM {
+func NewWithClient(auth *aws.Auth, region aws.Region, httpClient *http.Client) *IAM {
 	return &IAM{auth, region, httpClient}
 }
 
@@ -371,7 +371,6 @@ func (iam *IAM) GetUserPolicy(userName, policyName string) (*GetUserPolicyResp, 
 		return nil, err
 	}
 	return resp, nil
-	return nil, nil
 }
 
 // PutUserPolicy creates a user policy in IAM.

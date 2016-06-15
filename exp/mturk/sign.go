@@ -11,9 +11,12 @@ var b64 = base64.StdEncoding
 
 // ----------------------------------------------------------------------------
 // Mechanical Turk signing (http://goo.gl/wrzfn)
-func sign(auth aws.Auth, service, method, timestamp string, params map[string]string) {
+func sign(auth *aws.Auth, service, method, timestamp string, params map[string]string) {
+	accessKey, secretKey, _ := auth.Credentials()
+	params["AWSAccessKeyId"] = accessKey
+
 	payload := service + method + timestamp
-	hash := hmac.New(sha1.New, []byte(auth.SecretKey))
+	hash := hmac.New(sha1.New, []byte(secretKey))
 	hash.Write([]byte(payload))
 	signature := make([]byte, b64.EncodedLen(hash.Size()))
 	b64.Encode(signature, hash.Sum(nil))

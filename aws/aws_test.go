@@ -111,7 +111,7 @@ func (s *S) TestSharedAuthDefaultCredentials(c *C) {
 
 	auth, err := aws.SharedAuth()
 	c.Assert(err, IsNil)
-	c.Assert(auth, Equals, aws.Auth{SecretKey: "secret", AccessKey: "access"})
+	c.Assert(*auth, Equals, *aws.NewAuth("access", "secret", "", time.Time{}))
 }
 
 func (s *S) TestSharedAuth(c *C) {
@@ -134,7 +134,7 @@ func (s *S) TestSharedAuth(c *C) {
 
 	auth, err := aws.SharedAuth()
 	c.Assert(err, IsNil)
-	c.Assert(auth, Equals, aws.Auth{SecretKey: "secret", AccessKey: "access"})
+	c.Assert(*auth, Equals, *aws.NewAuth("access", "secret", "", time.Time{}))
 }
 
 func (s *S) TestEnvAuthNoSecret(c *C) {
@@ -156,7 +156,7 @@ func (s *S) TestEnvAuth(c *C) {
 	os.Setenv("AWS_ACCESS_KEY_ID", "access")
 	auth, err := aws.EnvAuth()
 	c.Assert(err, IsNil)
-	c.Assert(auth, Equals, aws.Auth{SecretKey: "secret", AccessKey: "access"})
+	c.Assert(*auth, Equals, *aws.NewAuth("access", "secret", "", time.Time{}))
 }
 
 func (s *S) TestEnvAuthAlt(c *C) {
@@ -165,7 +165,7 @@ func (s *S) TestEnvAuthAlt(c *C) {
 	os.Setenv("AWS_ACCESS_KEY", "access")
 	auth, err := aws.EnvAuth()
 	c.Assert(err, IsNil)
-	c.Assert(auth, Equals, aws.Auth{SecretKey: "secret", AccessKey: "access"})
+	c.Assert(*auth, Equals, *aws.NewAuth("access", "secret", "", time.Time{}))
 }
 
 func (s *S) TestEnvAuthToken(c *C) {
@@ -175,8 +175,8 @@ func (s *S) TestEnvAuthToken(c *C) {
 	os.Setenv("AWS_SESSION_TOKEN", "token")
 	auth, err := aws.EnvAuth()
 	c.Assert(err, IsNil)
-	c.Assert(auth.SecretKey, Equals, "secret")
-	c.Assert(auth.AccessKey, Equals, "access")
+	c.Assert(auth.SecretKey(), Equals, "secret")
+	c.Assert(auth.AccessKey(), Equals, "access")
 	c.Assert(auth.Token(), Equals, "token")
 }
 
@@ -184,8 +184,8 @@ func (s *S) TestGetAuthStatic(c *C) {
 	exptdate := time.Now().Add(time.Hour)
 	auth, err := aws.GetAuth("access", "secret", "token", exptdate)
 	c.Assert(err, IsNil)
-	c.Assert(auth.AccessKey, Equals, "access")
-	c.Assert(auth.SecretKey, Equals, "secret")
+	c.Assert(auth.AccessKey(), Equals, "access")
+	c.Assert(auth.SecretKey(), Equals, "secret")
 	c.Assert(auth.Token(), Equals, "token")
 	c.Assert(auth.Expiration(), Equals, exptdate)
 }
@@ -196,7 +196,7 @@ func (s *S) TestGetAuthEnv(c *C) {
 	os.Setenv("AWS_ACCESS_KEY_ID", "access")
 	auth, err := aws.GetAuth("", "", "", time.Time{})
 	c.Assert(err, IsNil)
-	c.Assert(auth, Equals, aws.Auth{SecretKey: "secret", AccessKey: "access"})
+	c.Assert(*auth, Equals, *aws.NewAuth("access", "secret", "", time.Time{}))
 }
 
 func (s *S) TestEncode(c *C) {

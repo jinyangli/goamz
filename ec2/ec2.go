@@ -31,19 +31,19 @@ const debug = false
 
 // The EC2 type encapsulates operations with a specific EC2 region.
 type EC2 struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 	httpClient *http.Client
 	private    byte // Reserve the right of using private data.
 }
 
 // NewWithClient creates a new EC2 with a custom http client
-func NewWithClient(auth aws.Auth, region aws.Region, client *http.Client) *EC2 {
+func NewWithClient(auth *aws.Auth, region aws.Region, client *http.Client) *EC2 {
 	return &EC2{auth, region, client, 0}
 }
 
 // New creates a new EC2.
-func New(auth aws.Auth, region aws.Region) *EC2 {
+func New(auth *aws.Auth, region aws.Region) *EC2 {
 	return NewWithClient(auth, region, aws.RetryingClient)
 }
 

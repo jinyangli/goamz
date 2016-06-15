@@ -17,7 +17,7 @@ var _ = Suite(&S{})
 
 func (s *S) SetUpSuite(c *C) {
 	s.HTTPSuite.SetUpSuite(c)
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.elb = elb.New(auth, aws.Region{ELBEndpoint: testServer.URL})
 }
 

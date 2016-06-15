@@ -26,7 +26,7 @@ var mockTest bool
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.as = New(auth, aws.Region{AutoScalingEndpoint: testServer.URL})
 }
 
@@ -40,7 +40,7 @@ func TestBasicGroupRequest(t *testing.T) {
 	if err != nil {
 		mockTest = true
 		t.Log("Running mock tests as AWS environment variables are not set")
-		awsAuth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+		awsAuth := aws.NewAuth("abc", "123", "", time.Time{})
 		as = New(awsAuth, aws.Region{AutoScalingEndpoint: testServer.URL})
 		testServer.Start()
 		go testServer.WaitRequest()
@@ -99,7 +99,7 @@ func TestAutoScalingGroup(t *testing.T) {
 	if err != nil {
 		mockTest = true
 		t.Log("Running mock tests as AWS environment variables are not set")
-		awsAuth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+		awsAuth := aws.NewAuth("abc", "123", "", time.Time{})
 		as = New(awsAuth, aws.Region{AutoScalingEndpoint: testServer.URL})
 	} else {
 		as = New(awsAuth, aws.USWest2)

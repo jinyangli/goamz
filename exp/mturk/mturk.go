@@ -27,11 +27,11 @@ import (
 )
 
 type MTurk struct {
-	aws.Auth
+	*aws.Auth
 	URL *url.URL
 }
 
-func New(auth aws.Auth, sandbox bool) *MTurk {
+func New(auth *aws.Auth, sandbox bool) *MTurk {
 	mt := &MTurk{Auth: auth}
 	var err error
 	if sandbox {
@@ -436,7 +436,6 @@ func (mt *MTurk) query(params map[string]string, operation string, resp interfac
 	service := "AWSMechanicalTurkRequester"
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-	params["AWSAccessKeyId"] = mt.Auth.AccessKey
 	params["Service"] = service
 	params["Timestamp"] = timestamp
 	params["Operation"] = operation

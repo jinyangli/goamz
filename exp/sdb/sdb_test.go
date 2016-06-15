@@ -1,6 +1,7 @@
 package sdb_test
 
 import (
+	"time"
 	"testing"
 
 	"github.com/goamz/goamz/aws"
@@ -23,7 +24,7 @@ var testServer = testutil.NewHTTPServer()
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.sdb = sdb.New(auth, aws.Region{SDBEndpoint: testServer.URL})
 }
 

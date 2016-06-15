@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"time"
 	"testing"
 
 	. "gopkg.in/check.v1"
@@ -25,7 +26,7 @@ var mockTest bool
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.ecs = New(auth, aws.Region{ECSEndpoint: testServer.URL})
 }
 

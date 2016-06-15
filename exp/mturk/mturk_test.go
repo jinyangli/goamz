@@ -3,6 +3,7 @@ package mturk_test
 import (
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/exp/mturk"
@@ -24,7 +25,7 @@ var testServer = testutil.NewHTTPServer()
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "",  time.Time{})
 	u, err := url.Parse(testServer.URL)
 	if err != nil {
 		panic(err.Error())

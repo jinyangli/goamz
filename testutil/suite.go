@@ -16,7 +16,7 @@ func init() {
 }
 
 type LiveSuite struct {
-	auth aws.Auth
+	auth *aws.Auth
 }
 
 func (s *LiveSuite) SetUpSuite(c *C) {

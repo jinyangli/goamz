@@ -1,6 +1,8 @@
 package sdb_test
 
 import (
+	"time"
+
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/exp/sdb"
 	. "gopkg.in/check.v1"
@@ -8,7 +10,7 @@ import (
 
 // SimpleDB ReST authentication docs: http://goo.gl/CaY81
 
-var testAuth = aws.Auth{AccessKey: "access-key-id-s8eBOWuU", SecretKey: "secret-access-key-UkQjTLd9"}
+var testAuth = aws.NewAuth("access-key-id-s8eBOWuU", "secret-access-key-UkQjTLd9", "", time.Time{})
 
 func (s *S) TestSignExampleDomainCreate(c *C) {
 	method := "GET"

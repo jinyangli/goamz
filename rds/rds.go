@@ -21,7 +21,7 @@ type RDS struct {
 }
 
 // New creates a new RDS Client.
-func New(auth aws.Auth, region aws.Region) (*RDS, error) {
+func New(auth *aws.Auth, region aws.Region) (*RDS, error) {
 	service, err := aws.NewService(auth, region.RDSEndpoint)
 	if err != nil {
 		return nil, err

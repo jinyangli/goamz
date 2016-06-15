@@ -66,7 +66,12 @@ func (l keySortableTupleList) Swap(i, j int) {
 	l[i], l[j] = l[j], l[i]
 }
 
-func sign(auth aws.Auth, method, canonicalPath string, params, headers map[string][]string) {
+func sign(auth *aws.Auth, method, canonicalPath string, params, headers map[string][]string) {
+	accessKey, secretKey, token := auth.Credentials()
+	if token != "" {
+		headers["X-Amz-Security-Token"] = []string{token}
+	}
+
 	var md5, ctype, date, xamz string
 	var xamzDate bool
 	var sarray keySortableTupleList
@@ -102,7 +107,7 @@ func sign(auth aws.Auth, method, canonicalPath string, params, headers map[strin
 		// Query string request authentication alternative.
 		expires = true
 		date = v[0]
-		params["AWSAccessKeyId"] = []string{auth.AccessKey}
+		params["AWSAccessKeyId"] = []string{accessKey}
 	}
 
 	sarray = sarray[0:0]
@@ -124,7 +129,7 @@ func sign(auth aws.Auth, method, canonicalPath string, params, headers map[strin
 	}
 
 	payload := method + "\n" + md5 + "\n" + ctype + "\n" + date + "\n" + xamz + canonicalPath
-	hash := hmac.New(sha1.New, []byte(auth.SecretKey))
+	hash := hmac.New(sha1.New, []byte(secretKey))
 	hash.Write([]byte(payload))
 	signature := make([]byte, b64.EncodedLen(hash.Size()))
 	b64.Encode(signature, hash.Sum(nil))
@@ -132,7 +137,7 @@ func sign(auth aws.Auth, method, canonicalPath string, params, headers map[strin
 	if expires {
 		params["Signature"] = []string{string(signature)}
 	} else {
-		headers["Authorization"] = []string{"AWS " + auth.AccessKey + ":" + string(signature)}
+		headers["Authorization"] = []string{"AWS " + accessKey + ":" + string(signature)}
 	}
 	if debug {
 		log.Printf("Signature payload: %q", payload)

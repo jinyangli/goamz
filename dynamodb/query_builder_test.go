@@ -1,6 +1,8 @@
 package dynamodb_test
 
 import (
+	"time"
+
 	simplejson "github.com/bitly/go-simplejson"
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/dynamodb"
@@ -14,8 +16,8 @@ type QueryBuilderSuite struct {
 var _ = Suite(&QueryBuilderSuite{})
 
 func (s *QueryBuilderSuite) SetUpSuite(c *C) {
-	auth := &aws.Auth{AccessKey: "", SecretKey: "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"}
-	s.server = &dynamodb.Server{*auth, aws.USEast}
+	auth := aws.NewAuth("", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY", "", time.Time{})
+	s.server = &dynamodb.Server{auth, aws.USEast, nil}
 }
 
 func (s *QueryBuilderSuite) TestEmptyQuery(c *C) {

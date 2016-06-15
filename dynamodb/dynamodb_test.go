@@ -16,7 +16,7 @@ var amazon = flag.Bool("amazon", false, "Enable tests against dynamodb")
 var local = flag.Bool("local", true, "Use DynamoDB local on 8080 instead of real server on us-east.")
 
 var dynamodb_region aws.Region
-var dynamodb_auth aws.Auth
+var dynamodb_auth *aws.Auth
 
 type DynamoDBTest struct {
 	server            *dynamodb.Server
@@ -140,7 +140,7 @@ func setUpAuth(c *C) {
 			DynamoDBEndpoint:        "http://127.0.0.1:8000",
 			DynamoDBStreamsEndpoint: "http://127.0.0.1:8000",
 		}
-		dynamodb_auth = aws.Auth{AccessKey: "DUMMY_KEY", SecretKey: "DUMMY_SECRET"}
+		dynamodb_auth = aws.NewAuth("DUMMY_KEY", "DUMMY_SECRET", "", time.Time{})
 	} else {
 		c.Log("Using REAL AMAZON SERVER")
 		dynamodb_region = aws.USEast

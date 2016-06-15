@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
+	"time"
 
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/ec2"
@@ -14,7 +15,7 @@ import (
 
 // LocalServer represents a local ec2test fake server.
 type LocalServer struct {
-	auth   aws.Auth
+	auth   *aws.Auth
 	region aws.Region
 	srv    *ec2test.Server
 }
@@ -26,6 +27,7 @@ func (s *LocalServer) SetUp(c *C) {
 
 	s.srv = srv
 	s.region = aws.Region{EC2Endpoint: srv.URL()}
+	s.auth = aws.NewAuth("", "", "", time.Time{})
 }
 
 // LocalServerSuite defines tests that will run

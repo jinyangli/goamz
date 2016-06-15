@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/exp/ses"
@@ -26,7 +27,7 @@ var testServer = testutil.NewHTTPServer()
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	auth := aws.NewAuth("abc", "123", "", time.Time{})
 	s.ses = ses.NewSES(auth, aws.Region{Name: "faux-region-1", S3Endpoint: testServer.URL})
 }
 

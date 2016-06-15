@@ -1,6 +1,8 @@
 package s3_test
 
 import (
+	"time"
+
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/s3"
 	"github.com/goamz/goamz/s3/s3test"
@@ -8,7 +10,7 @@ import (
 )
 
 type LocalServer struct {
-	auth   aws.Auth
+	auth   *aws.Auth
 	region aws.Region
 	srv    *s3test.Server
 	config *s3test.Config
@@ -25,6 +27,7 @@ func (s *LocalServer) SetUp(c *C) {
 		S3Endpoint:           srv.URL(),
 		S3LocationConstraint: true, // s3test server requires a LocationConstraint
 	}
+	s.auth = aws.NewAuth("", "", "", time.Time{})
 }
 
 // LocalServerSuite defines tests that will run

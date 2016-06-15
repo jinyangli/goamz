@@ -19,7 +19,7 @@ import (
 
 // AmazonServer represents an Amazon S3 server.
 type AmazonServer struct {
-	auth aws.Auth
+	auth *aws.Auth
 }
 
 func (s *AmazonServer) SetUp(c *C) {
@@ -94,9 +94,9 @@ func (s *ClientTests) Cleanup() {
 func testBucket(s *s3.S3) *s3.Bucket {
 	// Watch out! If this function is corrupted and made to match with something
 	// people own, killBucket will happily remove *everything* inside the bucket.
-	key := s.Auth.AccessKey
+	key, _, _ := s.Auth.Credentials()
 	if len(key) >= 8 {
-		key = s.Auth.AccessKey[:8]
+		key = key[:8]
 	}
 	return s.Bucket(fmt.Sprintf("goamz-%s-%s", s.Region.Name, key))
 }
@@ -222,7 +222,8 @@ func (s *ClientTests) TestBasicFunctionality(c *C) {
 }
 
 func (s *ClientTests) TestGetNotFound(c *C) {
-	b := s.s3.Bucket("goamz-" + s.s3.Auth.AccessKey)
+	accessKey, _, _ := s.s3.Auth.Credentials()
+	b := s.s3.Bucket("goamz-" + accessKey)
 	data, err := b.Get("non-existent")
 
 	s3err, _ := err.(*s3.Error)
@@ -235,11 +236,12 @@ func (s *ClientTests) TestGetNotFound(c *C) {
 
 // Communicate with all endpoints to see if they are alive.
 func (s *ClientTests) TestRegions(c *C) {
+	accessKey, _, _ := s.s3.Auth.Credentials()
 	errs := make(chan error, len(aws.Regions))
 	for _, region := range aws.Regions {
 		go func(r aws.Region) {
 			s := s3.New(s.s3.Auth, r)
-			b := s.Bucket("goamz-" + s.Auth.AccessKey)
+			b := s.Bucket("goamz-" + accessKey)
 			_, err := b.Get("non-existent")
 			errs <- err
 		}(region)

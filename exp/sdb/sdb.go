@@ -35,13 +35,13 @@ const debug = false
 
 // The SDB type encapsulates operations with a specific SimpleDB region.
 type SDB struct {
-	aws.Auth
+	*aws.Auth
 	aws.Region
 	private byte // Reserve the right of using private data.
 }
 
 // New creates a new SDB.
-func New(auth aws.Auth, region aws.Region) *SDB {
+func New(auth *aws.Auth, region aws.Region) *SDB {
 	return &SDB{auth, region, 0}
 }
 

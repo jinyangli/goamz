@@ -11,8 +11,9 @@ import (
 
 var b64 = base64.StdEncoding
 
-func sign(auth aws.Auth, method, path string, params map[string]string, host string) {
-	params["AWSAccessKeyId"] = auth.AccessKey
+func sign(auth *aws.Auth, method, path string, params map[string]string, host string) {
+	accessKey, secretKey, _ := auth.Credentials()
+	params["AWSAccessKeyId"] = accessKey
 	params["SignatureVersion"] = "2"
 	params["SignatureMethod"] = "HmacSHA256"
 
@@ -26,7 +27,7 @@ func sign(auth aws.Auth, method, path string, params map[string]string, host str
 	}
 	joined := strings.Join(sarray, "&")
 	payload := method + "\n" + host + "\n" + path + "\n" + joined
-	hash := hmac.New(sha256.New, []byte(auth.SecretKey))
+	hash := hmac.New(sha256.New, []byte(secretKey))
 	hash.Write([]byte(payload))
 	signature := make([]byte, b64.EncodedLen(hash.Size()))
 	b64.Encode(signature, hash.Sum(nil))
