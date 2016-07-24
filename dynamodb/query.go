@@ -157,6 +157,7 @@ func (t *Table) QueryConsistent2(attributeComparisons []AttributeComparison, con
 	q := NewQuery(t)
 	q.ConsistentRead(consistentRead)
 	q.AddKeyConditions(attributeComparisons)
+	q.ReturnConsumedCapacity(true)
 	return runQuery2(q, t)
 }
 
@@ -165,6 +166,7 @@ func (t *Table) QueryOnIndex2(attributeComparisons []AttributeComparison, indexN
 	q := NewQuery(t)
 	q.AddKeyConditions(attributeComparisons)
 	q.AddIndex(indexName)
+	q.ReturnConsumedCapacity(true)
 	return runQuery2(q, t)
 }
 
@@ -174,6 +176,7 @@ func (t *Table) LimitedQueryConsistent2(attributeComparisons []AttributeComparis
 	q.ConsistentRead(consistentRead)
 	q.AddKeyConditions(attributeComparisons)
 	q.AddLimit(limit)
+	q.ReturnConsumedCapacity(true)
 	return runQuery2(q, t)
 }
 
@@ -184,6 +187,7 @@ func (t *Table) LimitedQueryDescendingConsistent2(attributeComparisons []Attribu
 	q.AddKeyConditions(attributeComparisons)
 	q.AddLimit(limit)
 	q.ScanIndexDescending()
+	q.ReturnConsumedCapacity(true)
 	return runQuery2(q, t)
 }
 
