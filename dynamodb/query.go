@@ -12,6 +12,31 @@ func (t *Table) Query(attributeComparisons []AttributeComparison) ([]map[string]
 	return runQuery(q, t)
 }
 
+func (t *Table) QueryWithPagination(startKey *Key, attributeComparisons []AttributeComparison) ([]map[string]*Attribute, *Key, error) {
+	q := NewQuery(t)
+	if startKey != nil {
+		query.AddStartKey(t, startKey)
+	}
+	q.AddKeyConditions(attributeComparisons)
+	attrs, json, err := runQuery2(q, t)
+
+	var lastKey *Key
+	if marker, ok := json.CheckGet("LastEvaluatedKey"); ok {
+		keymap, err := marker.Map()
+		if err != nil {
+			return nil, nil, fmt.Errorf("Unexpected LastEvaluatedKey in response %s\n", jsonResponse)
+		}
+		lastKey = &Key{}
+		hashmap := keymap[t.Key.KeyAttribute.Name].(map[string]interface{})
+		lastKey.HashKey = hashmap[t.Key.KeyAttribute.Type].(string)
+		if t.Key.HasRange() {
+			rangemap := keymap[t.Key.RangeAttribute.Name].(map[string]interface{})
+			lastKey.RangeKey = rangemap[t.Key.RangeAttribute.Type].(string)
+		}
+	}
+	return attrs, lastKey, nil
+}
+
 func (t *Table) QueryConsistent(attributeComparisons []AttributeComparison, consistentRead bool) (
 	[]map[string]*Attribute, error) {
 	q := NewQuery(t)
