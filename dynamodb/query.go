@@ -27,7 +27,7 @@ func (t *Table) QueryWithPagination(startKey *Key, attributeComparisons []Attrib
 	if marker, ok := jsonResponse.CheckGet("LastEvaluatedKey"); ok {
 		keymap, err := marker.Map()
 		if err != nil {
-			return nil, nil, fmt.Errorf("Unexpected LastEvaluatedKey in response\n")
+			return nil, nil, fmt.Errorf("Unexpected LastEvaluatedKey in response")
 		}
 		lastKey = &Key{}
 		hashmap := keymap[t.Key.KeyAttribute.Name].(map[string]interface{})
