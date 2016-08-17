@@ -15,16 +15,19 @@ func (t *Table) Query(attributeComparisons []AttributeComparison) ([]map[string]
 func (t *Table) QueryWithPagination(startKey *Key, attributeComparisons []AttributeComparison) ([]map[string]*Attribute, *Key, error) {
 	q := NewQuery(t)
 	if startKey != nil {
-		query.AddStartKey(t, startKey)
+		q.AddStartKey(t, startKey)
 	}
 	q.AddKeyConditions(attributeComparisons)
-	attrs, json, err := runQuery2(q, t)
+	attrs, jsonResponse, err := runQuery2(q, t)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	var lastKey *Key
-	if marker, ok := json.CheckGet("LastEvaluatedKey"); ok {
+	if marker, ok := jsonResponse.CheckGet("LastEvaluatedKey"); ok {
 		keymap, err := marker.Map()
 		if err != nil {
-			return nil, nil, fmt.Errorf("Unexpected LastEvaluatedKey in response %s\n", jsonResponse)
+			return nil, nil, fmt.Errorf("Unexpected LastEvaluatedKey in response\n")
 		}
 		lastKey = &Key{}
 		hashmap := keymap[t.Key.KeyAttribute.Name].(map[string]interface{})
