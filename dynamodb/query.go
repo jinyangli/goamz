@@ -6,6 +6,11 @@ import (
 	simplejson "github.com/bitly/go-simplejson"
 )
 
+const (
+	returnConsumedCapacity     bool = true
+	dontReturnConsumedCapacity bool = false
+)
+
 func (t *Table) Query(attributeComparisons []AttributeComparison) ([]map[string]*Attribute, error) {
 	q := NewQuery(t)
 	q.AddKeyConditions(attributeComparisons)
@@ -13,21 +18,31 @@ func (t *Table) Query(attributeComparisons []AttributeComparison) ([]map[string]
 }
 
 func (t *Table) QueryWithPagination(startKey *Key, attributeComparisons []AttributeComparison) ([]map[string]*Attribute, *Key, error) {
+	attrs, lastKey, _, err := t.queryWithPagination(startKey, attributeComparisons, dontReturnConsumedCapacity)
+	return attrs, lastKey, err
+}
+
+func (t *Table) QueryWithPagination2(startKey *Key, attributeComparisons []AttributeComparison) ([]map[string]*Attribute, *Key, *simplejson.Json, error) {
+	return t.queryWithPagination(startKey, attributeComparisons, returnConsumedCapacity)
+}
+
+func (t *Table) queryWithPagination(startKey *Key, attributeComparisons []AttributeComparison, shouldReturnConsumedCapacity bool) ([]map[string]*Attribute, *Key, *simplejson.Json, error) {
 	q := NewQuery(t)
 	if startKey != nil {
 		q.AddStartKey(t, startKey)
 	}
+	q.ReturnConsumedCapacity(shouldReturnConsumedCapacity)
 	q.AddKeyConditions(attributeComparisons)
 	attrs, jsonResponse, err := runQuery2(q, t)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, jsonResponse, err
 	}
 
 	var lastKey *Key
 	if marker, ok := jsonResponse.CheckGet("LastEvaluatedKey"); ok {
 		keymap, err := marker.Map()
 		if err != nil {
-			return nil, nil, fmt.Errorf("Unexpected LastEvaluatedKey in response")
+			return nil, nil, jsonResponse, fmt.Errorf("Unexpected LastEvaluatedKey in response")
 		}
 		lastKey = &Key{}
 		hashmap := keymap[t.Key.KeyAttribute.Name].(map[string]interface{})
@@ -37,7 +52,7 @@ func (t *Table) QueryWithPagination(startKey *Key, attributeComparisons []Attrib
 			lastKey.RangeKey = rangemap[t.Key.RangeAttribute.Type].(string)
 		}
 	}
-	return attrs, lastKey, nil
+	return attrs, lastKey, jsonResponse, nil
 }
 
 func (t *Table) QueryConsistent(attributeComparisons []AttributeComparison, consistentRead bool) (
@@ -238,7 +253,7 @@ func runQuery2(q *Query, t *Table) ([]map[string]*Attribute, *simplejson.Json, e
 
 	results := make([]map[string]*Attribute, itemCount)
 
-	for i, _ := range results {
+	for i := range results {
 		item, err := json.Get("Items").GetIndex(i).Map()
 		if err != nil {
 			message := fmt.Sprintf("Unexpected response %s", jsonResponse)
