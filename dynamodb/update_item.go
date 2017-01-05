@@ -29,14 +29,16 @@ func (t *Table) UpdateItem2(key *Key, returnConsumedCapacity bool) *UpdateItem {
 	u := t.UpdateItem(key)
 	if returnConsumedCapacity {
 		u.query.ReturnConsumedCapacity(returnConsumedCapacity)
+		u.hasConsumedCapacity = true
 	}
 	return u
 }
 
 type UpdateItem struct {
-	table           *Table
-	query           *Query
-	hasReturnValues bool
+	table               *Table
+	query               *Query
+	hasReturnValues     bool
+	hasConsumedCapacity bool
 }
 
 func (u *UpdateItem) String() string {
@@ -85,26 +87,36 @@ func (u *UpdateItem) ConditionExpression(expression string) *UpdateItem {
 	return u
 }
 
-// Execute this query.
-func (u *UpdateItem) Execute() (*UpdateResult, error) {
+// Execute this query and return complete json response
+func (u *UpdateItem) Execute2() (*simplejson.Json, *UpdateResult, error) {
 	jsonResponse, err := u.table.Server.queryServer(target("UpdateItem"), u.query)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	var resp *simplejson.Json
+	if u.hasConsumedCapacity || u.hasReturnValues {
+		resp, err = simplejson.NewJson(jsonResponse)
+		if err != nil {
+			return resp, nil, err
+		}
 	}
 
 	if u.hasReturnValues {
-		resp, err := simplejson.NewJson(jsonResponse)
-		if err != nil {
-			return nil, err
-		}
 		attrib, err := resp.Get("Attributes").Map()
 		if err != nil {
-			return nil, err
+			return resp, nil, err
 		}
-		return &UpdateResult{parseAttributes(attrib)}, nil
+		return resp, &UpdateResult{parseAttributes(attrib)}, nil
 	}
-	return nil, nil
+	return resp, nil, nil
+}
+
+// Execute this query.
+func (u *UpdateItem) Execute() (*UpdateResult, error) {
+	_, result, err := u.Execute2()
+	return result, err
 }
 
 type UpdateResult struct {
