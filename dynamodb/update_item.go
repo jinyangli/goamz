@@ -25,6 +25,14 @@ func (t *Table) UpdateItem(key *Key) *UpdateItem {
 	return &UpdateItem{table: t, query: q}
 }
 
+func (t *Table) UpdateItem2(key *Key, returnConsumedCapacity bool) *UpdateItem {
+	u := t.UpdateItem(key)
+	if returnConsumedCapacity {
+		u.query.ReturnConsumedCapacity(returnConsumedCapacity)
+	}
+	return u
+}
+
 type UpdateItem struct {
 	table           *Table
 	query           *Query
