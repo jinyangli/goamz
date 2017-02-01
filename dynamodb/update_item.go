@@ -25,15 +25,6 @@ func (t *Table) UpdateItem(key *Key) *UpdateItem {
 	return &UpdateItem{table: t, query: q}
 }
 
-func (t *Table) UpdateItem2(key *Key, returnConsumedCapacity bool) *UpdateItem {
-	u := t.UpdateItem(key)
-	if returnConsumedCapacity {
-		u.query.ReturnConsumedCapacity(returnConsumedCapacity)
-		u.hasConsumedCapacity = true
-	}
-	return u
-}
-
 type UpdateItem struct {
 	table               *Table
 	query               *Query
@@ -49,6 +40,13 @@ func (u *UpdateItem) String() string {
 func (u *UpdateItem) ReturnValues(returnValues ReturnValues) *UpdateItem {
 	u.hasReturnValues = (returnValues != NONE)
 	u.query.AddReturnValues(returnValues)
+	return u
+}
+
+// Specify whether consumed capacity is to be returned
+func (u *UpdateItem) ReturnConsumedCapacity(shouldReturnConsumedCapacity bool) *UpdateItem {
+	u.hasConsumedCapacity = shouldReturnConsumedCapacity
+	u.query.ReturnConsumedCapacity(shouldReturnConsumedCapacity)
 	return u
 }
 
@@ -103,7 +101,7 @@ func (u *UpdateItem) Execute2() (*simplejson.Json, *UpdateResult, error) {
 		}
 	}
 
-	if u.hasReturnValues {
+	if resp != nil && u.hasReturnValues {
 		attrib, err := resp.Get("Attributes").Map()
 		if err != nil {
 			return resp, nil, err

@@ -28,8 +28,6 @@ func (t *Table) QueryWithPagination2(startKey *Key, attributeComparisons []Attri
 
 func (t *Table) queryWithPagination(startKey *Key, attributeComparisons []AttributeComparison, shouldReturnConsumedCapacity bool) ([]map[string]*Attribute, *Key, *simplejson.Json, error) {
 	q := NewQuery(t)
-	q.ReturnConsumedCapacity(true)
-
 	if startKey != nil {
 		q.AddStartKey(t, startKey)
 	}

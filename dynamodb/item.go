@@ -348,7 +348,7 @@ func (t *Table) modifyAttributes(key *Key, attributes, expected []Attribute, act
 	return true, nil
 }
 
-func (t *Table) modifyAttributes2(key *Key, attributes, expected []Attribute, action string, returnConsumedCapacity bool) (*simplejson.Json, error) {
+func (t *Table) modifyAttributes2(key *Key, attributes, expected []Attribute, action string, shouldReturnConsumedCapacity bool) (*simplejson.Json, error) {
 
 	if len(attributes) == 0 {
 		return nil, errors.New("At least one attribute is required.")
@@ -357,10 +357,7 @@ func (t *Table) modifyAttributes2(key *Key, attributes, expected []Attribute, ac
 	q := NewQuery(t)
 	q.AddKey(t, key)
 	q.AddUpdates(attributes, action)
-
-	if returnConsumedCapacity {
-		q.ReturnConsumedCapacity(returnConsumedCapacity)
-	}
+	q.ReturnConsumedCapacity(shouldReturnConsumedCapacity)
 
 	if expected != nil {
 		q.AddExpected(expected)
